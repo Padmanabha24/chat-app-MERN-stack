@@ -1,27 +1,35 @@
 import Conversation from "../models/conversationModel.js";
 import Message from "../models/messageModel.js";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 
 export const sendMessage=async (req,res)=>{
 try {
-    const {message}=req.body;
-    const {id:reciverId}=req.parms;
-    const {senderId}=req._id.userId;
+    const { message } = req.body;
+    const { id: receiverId } = req.params;
+    const senderId = req.user._id;
+
+    console.log("Request Body:", req.body);
+    console.log("Receiver ID:", receiverId);
+    console.log("Sender ID:", senderId);
 
     let conversation=await Conversation.findOne({
-        participants:{$all:[senderId,reciverId]},
+        participants:{$all:[senderId,receiverId]},
 
     })
 
     if(!conversation){
-        let conversation=await Conversation.create({
-            participants:{$all:[senderId,reciverId]},
+            conversation=await Conversation.create({
+            participants:[senderId,receiverId],
     
         })
     }
 
     const newMessage=new Message({
         senderId,
-        reciverId,
+        receiverId,
         message,
 
     })
@@ -29,12 +37,42 @@ try {
     if(newMessage){
         conversation.messages.push(newMessage._id);
     }
+// socket.io functionality
+
+
+//    await  conversation.save();
+//     await newMessage.save();
+
+//this runs both simultaniously
+  await Promise.all([ conversation.save(),newMessage.save()]);
 
     res.status(201).json(newMessage);
 
 } 
 catch (error) {
-    console.log("unable to send the message (controller)", err.message);
-res.status(500).json({ error: "Internal Server Error" });
+    console.log("unable to send the message (controller)", error.message);
+res.status(500).json({ error: "Internal Server Error from msgctrl" });
 }
+}
+
+export const getMessage=async (req,res)=>{
+    try {
+        const {id:userToChatId}=req.params;
+        const senderId=req.user._id;
+
+        const conversation = await Conversation.findOne({
+			participants: { $all: [senderId, userToChatId] },
+		}).populate("messages"); // NOT REFERENCE BUT ACTUAL MESSAGES
+
+		if (!conversation) return res.status(200).json([]);
+
+		const messages = conversation.messages;
+
+		res.status(200).json(messages);
+
+    } 
+    catch (error) {
+        console.log("unable to send the message (controller)", error.message);
+    res.status(500).json({ error: "Internal Server Error from msgctrl" });
+    }
 }

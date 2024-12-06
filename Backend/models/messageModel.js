@@ -1,27 +1,27 @@
 import mongoose from "mongoose";
 
-const messageSchema= new mongoose.Schema({
-    senderID:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        require:true
-
+const messageSchema = new mongoose.Schema(
+  {
+    senderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true, //
     },
-    reciverId:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        require:true
+    receiverId: { // Fixed typo in the field name
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true, // Fixed typo
     },
-    message:{
-        type:String,
-        require:true
+    message: {
+      type: String,
+      required: true, // Fixed typo
     },
+  },
+  {
+    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
+  }
+);
 
-},
-{
-    timestamps:true
-});
-
-const Message=mongoose.model("Message",messageSchema);
+const Message = mongoose.model("Message", messageSchema);
 
 export default Message;

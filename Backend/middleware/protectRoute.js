@@ -3,6 +3,7 @@ import User from "../models/userModels.js";
 
 const protectRoute=async (req,res,next)=>{
     try {
+        // const token=req.cookies.jwt;
         const token=req.cookies.jwt;
         if(!token){
             return res.status(401).json({error:"unauthorized - No token provided"});
@@ -24,8 +25,8 @@ const protectRoute=async (req,res,next)=>{
         next();
     } 
     catch (error) {
-        console.log("Error in protectRoute middleware", err.message);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.log("Error in protectRoute middleware", error.message);
+        res.status(500).json({ error: "Internal Server Error from protectRoute" });
     }
 
 }
