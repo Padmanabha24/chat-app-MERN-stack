@@ -4,11 +4,10 @@ import User from "../models/userModels.js";
 const protectRoute=async (req,res,next)=>{
     try {
         // const token=req.cookies.jwt;
-        const token=req.cookies.jwt;
+        const token=req.cookies["chat-user"];
         if(!token){
             return res.status(401).json({error:"unauthorized - No token provided"});
         }
-        
         const decoded=jwt.verify(token,process.env.JWT_SECRET);
         
         if(!decoded){

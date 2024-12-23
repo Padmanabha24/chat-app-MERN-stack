@@ -3,59 +3,65 @@ import User from "../models/userModels.js"
 import generateTokenandSetCookie from "../utils/generateTokens.js"
 
 
-export  const signup=async (req,res)=>{
-try{
-    console.log("signup page");
-const {fullname,username,password,confirmpassword,gender}=req.body;
-if(password!=confirmpassword){
-    return res.status(400).json({error:"password does not match"})
-}
+export const signup = async (req, res) => {
+    try {
+        console.log("Signup endpoint hit");
 
-const user=await User.findOne({username})
+        const { fullname, username, password, confirmpassword, gender } = req.body;
 
-if(user){
-    return res.status(400).json({error:"user already exist"});
-}
-//Hashing password using bcryptjs
-const salt=await bcrypt.genSalt(10);
-const hashedPassword=await bcrypt.hash(password,salt);
+        // Validate required fields
+        if (!fullname || !username || !password || !confirmpassword || !gender) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
 
+        // Check if passwords match
+        if (password !== confirmpassword) {
+            return res.status(400).json({ error: "Passwords do not match" });
+        }
 
-const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
-const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
+        // Check if user already exists
+        const user = await User.findOne({ username });
+        if (user) {
+            return res.status(400).json({ error: `Username '${username}' is already taken` });
+        }
 
+        // Hash the password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Generate profile picture URL
+        const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
+        const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
 
-const newUser=new User({
-    fullname,
-    username,
-    password:hashedPassword,
-    gender,
-    profilePic: gender=="male" ? boyProfilePic : girlProfilePic
-})
-if (newUser){
-//Generating JWT token
-     generateTokenandSetCookie(newUser._id,res);
+        // Create new user
+        const newUser = new User({
+            fullname,
+            username,
+            password: hashedPassword,
+            gender,
+            profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
+        });
 
-    await newUser.save();
-    res.send(201).json({ 
-    _id: newUser._id, 
-    fullname: newUser.fullname, 
-    username: newUser.username,
-    profilePic: newUser.profilePic, 
-    })
-}
-else{
-    res.status(400).json({ error: "invalid user data" });
+        if (newUser) {
+            // Generate token and set in cookie
+            generateTokenandSetCookie(newUser._id, res);
 
-}
+            await newUser.save();
 
-}
-catch(err){
-console.log("Error in signup controller", err.message);
-res.status(500).json({ error: "Internal Server Error" });
-}
-}   
+            res.status(201).json({
+                _id: newUser._id,
+                fullname: newUser.fullname,
+                username: newUser.username,
+                profilePic: newUser.profilePic,
+            });
+        } else {
+            res.status(400).json({ error: "Invalid user data" });
+        }
+    } catch (err) {
+        console.error("Error in signup controller:", err.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
 
 export  const login=async (req,res)=>{
     try {

@@ -1,12 +1,17 @@
-import { IoSearchSharp } from "react-icons/io5";
-const SearchInput = () => {
+import { BiLogOut } from "react-icons/bi";
+import useLogout from "../../hooks/useLogout";
+
+const LogoutButton = () => {
+	const { loading, logout } = useLogout();
+
 	return (
-		<form className='flex items-center gap-2'>
-			<input type='text' placeholder='Search…' className='input input-bordered rounded-full' />
-			<button type='submit' className='btn btn-circle bg-sky-500 text-white'>
-				<IoSearchSharp className='w-6 h-6 outline-none' />
-			</button>
-		</form>
+		<div className='mt-auto'>
+			{!loading ? (
+				<BiLogOut className='w-6 h-6 text-white cursor-pointer' onClick={logout} />
+			) : (
+				<span className='loading loading-spinner'></span>
+			)}
+		</div>
 	);
 };
-export default SearchInput;
+export default LogoutButton;
