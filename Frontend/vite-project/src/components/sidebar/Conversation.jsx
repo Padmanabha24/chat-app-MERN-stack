@@ -6,7 +6,7 @@ const Conversation = ({ conversation, lastIdx, emoji }) => {
 
 	const isSelected = selectedConversation?._id === conversation._id;
 	// const { onlineUsers } = useSocketContext();
-	const isOnline = onlineUsers.includes(conversation._id);
+	// const isOnline = onlineUsers.includes(conversation._id);
 
 	return (
 		<>
@@ -16,15 +16,16 @@ const Conversation = ({ conversation, lastIdx, emoji }) => {
 			`}
 				onClick={() => setSelectedConversation(conversation)}
 			>
-				<div className={`avatar ${isOnline ? "online" : ""}`}>
+				<div className="avatar online" >
 					<div className='w-12 rounded-full'>
-						<img src={conversation.profilePic} alt='user avatar' />
+					<img src={conversation.profilePic || "default-avatar.png"} alt="user avatar" />
+				
 					</div>
 				</div>
 
 				<div className='flex flex-col flex-1'>
 					<div className='flex gap-3 justify-between'>
-						<p className='font-bold text-gray-200'>{conversation.fullName}</p>
+						<p className='font-bold text-gray-200'>{conversation.fullname}</p>
 						<span className='text-xl'>{emoji}</span>
 					</div>
 				</div>
@@ -37,6 +38,7 @@ const Conversation = ({ conversation, lastIdx, emoji }) => {
 export default Conversation;
 
 // STARTER CODE SNIPPET
+// className={`avatar ${isOnline ? "online" : ""}`}
 // const Conversation = () => {
 // 	return (
 // 		<>

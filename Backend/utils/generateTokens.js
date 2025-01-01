@@ -8,7 +8,7 @@ const generateTokenandSetCookie = (userId, res) => {
 
     res.cookie("chat-user", token, {
         httpOnly: true, // Prevents client-side scripts from accessing the cookie
-        secure: process.env.NODE_ENV === "production", // Ensures the cookie is sent only over HTTPS in production
+        secure: false, // Ensures the cookie is sent only over HTTPS in production process.env.NODE_ENV === "production",
         sameSite: "strict", // Adjust based on your frontend-backend communication needs
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
