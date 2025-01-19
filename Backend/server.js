@@ -8,6 +8,10 @@ import connectToMongoDB from './DB/connectToMongoDB.js';
 import authRoutes from "../Backend/Routes/authRoutes.js";
 import messageRoutes from "../Backend/Routes/messageRoutes.js"
 import userRoutes from "../Backend/Routes/userRoutes.js"
+import groupRoutes from "./Routes/groupRoutes.js";
+
+
+
 
 dotenv.config();
  
@@ -29,6 +33,7 @@ const corsOptions = {
 app.use('/api/auth',authRoutes);
 app.use('/api/messages',messageRoutes);
 app.use('/api/users',userRoutes);
+app.use("/api/groups", groupRoutes);
 app.use((req, res, next) => {
     res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
     next();

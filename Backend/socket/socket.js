@@ -13,24 +13,66 @@ const io = new Server(server, {
 	},
 });
 
+const userSocketMap = {}; // {userId: socketId}
+const groupMap = {}; // {groupId: { groupName, members: [userId], messages: [] }}
+
+// Helper function to get a user's socket ID
 export const getReceiverSocketId = (receiverId) => {
 	return userSocketMap[receiverId];
 };
 
-const userSocketMap = {}; // {userId: socketId}
-
 io.on("connection", (socket) => {
-	console.log("a user connected", socket.id);
+	console.log("A user connected", socket.id);
 
 	const userId = socket.handshake.query.userId;
-	if (userId != "undefined") userSocketMap[userId] = socket.id;
+	if (userId !== "undefined") {
+		userSocketMap[userId] = socket.id;
+	}
 
-	// io.emit() is used to send events to all the connected clients
+	// Notify all clients about online users
 	io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-	// socket.on() is used to listen to the events. can be used both on client and server side
+	// Handle creating a group
+	socket.on("createGroup", ({ groupId, groupName, members }) => {
+		if (!groupMap[groupId]) {
+			groupMap[groupId] = { groupName, members, messages: [] };
+
+			// Notify all group members about the new group
+			members.forEach((memberId) => {
+				const socketId = userSocketMap[memberId];
+				if (socketId) {
+					io.to(socketId).emit("groupCreated", { groupId, groupName, members });
+				}
+			});
+
+			console.log(`Group created: ${groupName} with members`, members);
+		} else {
+			socket.emit("error", { message: "Group already exists!" });
+		}
+	});
+
+	// Handle sending a message to a group
+	socket.on("sendMessageToGroup", ({ groupId, message }) => {
+		const group = groupMap[groupId];
+		if (group) {
+			// Add the message to the group's message list
+			group.messages.push(message);
+
+			// Notify all members of the group about the new message
+			group.members.forEach((memberId) => {
+				const socketId = userSocketMap[memberId];
+				if (socketId) {
+					io.to(socketId).emit("newGroupMessage", { groupId, message });
+				}
+			});
+		} else {
+			socket.emit("error", { message: "Group does not exist!" });
+		}
+	});
+
+	// Handle user disconnect
 	socket.on("disconnect", () => {
-		console.log("user disconnected", socket.id);
+		console.log("User disconnected", socket.id);
 		delete userSocketMap[userId];
 		io.emit("getOnlineUsers", Object.keys(userSocketMap));
 	});

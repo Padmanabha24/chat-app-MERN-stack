@@ -1,6 +1,7 @@
 import Conversation from "../models/conversationModel.js";
 import Message from "../models/messageModel.js";
 import dotenv from "dotenv";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
 dotenv.config();
 

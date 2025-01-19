@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import useConversation from "../../zustand/useConversation";
+import useConversation from "../../Zustand/useConversation.js";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
 import { TiMessages } from "react-icons/ti";
@@ -67,3 +67,5 @@ const NoChatSelected = () => {
 // 	);
 // };
 // export default MessageContainer;
+
+
